@@ -75,6 +75,7 @@ int main(int nargs, char **argv)
         gettimeofday(&ini,NULL);
         // RGB to grey scale
         int r, g, b;
+        asm("#inicio_bucle");
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
@@ -83,7 +84,7 @@ int main(int nargs, char **argv)
                 grey_image[j * width + i] = (int)(0.2989 * r + 0.5870 * g + 0.1140 * b);
             }
         }
-
+        asm("#final_bucle");
         stbi_write_jpg(grey_image_filename, width, height, 1, grey_image, 10);
         free(rgb_image);
 
