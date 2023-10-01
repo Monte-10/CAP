@@ -24,7 +24,7 @@ stb_image_write.h:
 	wget --no-check-certificate https://raw.githubusercontent.com/nothings/stb/master/stb_image_write.h
 
 clean:
-	rm -f *.o *~ greyScale
+	rm -f *.o *~ greyScale greyScale_intrinsics
 	
 clear:
 	rm -f *.o *~

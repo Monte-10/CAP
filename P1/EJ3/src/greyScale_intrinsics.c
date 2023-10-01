@@ -86,35 +86,19 @@ int main(int nargs, char **argv)
                 int image_offset = (i + j*width)*4; 
     			uint8_t* image = rgb_image + image_offset;
 
-                // _mm_loadu_si128: Load 128-bits of integer data from memory into dst. mem_addr does not need to be aligned on any particular boundary.
-
-                // 4 pixeles en 2 vectores de 2 pixeles cada uno (8 bytes por vector)
-                // double = 64 bits = 8 bytes
-                // Data Low: 2 pixels = 8 bytes = 64 bits
+                // 8 bytes por vector
                 __m128i datal = _mm_loadu_si64(image);      
-                // Data High: 2 pixels = 8 bytes = 64 bits
                 __m128i datah = _mm_loadu_si64(image+8);    
 
-                // Extender a vectores de 126 bits (enteros de 16 bits)
-                // Low: vec_a, vec_b
-                // High: vec_c, vec_d
-                // _mm256_cvtepu8_epi32: Zero extend packed unsigned 8-bit integers in a to packed 32-bit integers, and store the results in dst.
-                // Extended Low
+                // Extender a vectores de 256 bits con padding de 0
                 __m256i elow = _mm256_cvtepu8_epi32(datal); 
-                // Extended High
                 __m256i ehigh = _mm256_cvtepu8_epi32(datah); 
 
                 // int to float
-                // _mm256_cvtepi32_ps: Convert packed signed 32-bit integers in a to packed single-precision (32-bit) floating-point elements, and store the results in dst.
-                // Floating Low
                 __m256 flow = _mm256_cvtepi32_ps(elow); 
-                // Floating High
                 __m256 fhigh = _mm256_cvtepi32_ps(ehigh); 
 
-                // Coefficients
-                // _mm256_set_pd: Set packed double-precision (64-bit) floating-point elements in dst with the supplied values.
-                // __m256 holds a pair of coefficients for each of the two pixels in low and high vectors
-                // Twice for two pixels
+                // Coeficientes duplicados al haber 2 pixeles por vector
                 __m256 coefficients = _mm256_setr_ps(0.2989, 0.5870, 0.114, 0, 0.2989, 0.5870, 0.114, 0); 
 
                 // Multiplicar pixeles por coeficientes
@@ -122,23 +106,19 @@ int main(int nargs, char **argv)
                 fhigh = _mm256_mul_ps(fhigh, coefficients);
 
                 // Horizontal add
-                // fvec_abcd <- fvec_ab hadd fvec_cd
-                // result <- fvec_abcd hadd fvec_abcd
-                // _mm256_hadd_ps: Horizontally add adjacent pairs of single-precision (32-bit) floating-point elements in a and b, and pack the results in dst.
                 __m256 sumpartial = _mm256_hadd_ps(flow, fhigh);
+                // Aproximacion a floor
                 __m256 sumfinal = _mm256_floor_ps(_mm256_hadd_ps(sumpartial, sumpartial));
 
-                // Reorder values from vector: [ACACBDBD]
-                // _mm256_permutevar8x32_ps
-                // 0, 4, 1, 5, 2, 6, 3, 7 (reverse)
+                //permuta los pixeles en el orden correcto
                 __m256i vperm = _mm256_setr_epi32(0, 4, 1, 5, 0, 0, 0, 0); 
-                // transforms [ACACBDBD] into [ABCDABCD]
+                // ordena de ACACBDBD a ABCDABCD
                 __m256 resultpartial = _mm256_permutevar8x32_ps(sumfinal, vperm);
 
-                // extract 4 pixels
+                // extrae los 4 primeros pixeles
                 __m128i result = _mm_cvtps_epi32(_mm256_extractf128_ps(resultpartial, 0));
 
-                // Store result
+                // guarda el resultado
                 __m128i perm = _mm_setr_epi8(0, 1*4, 2*4, 3*4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
                 result = _mm_shuffle_epi8(result, perm);
                 uint32_t *tt = (uint32_t*)&result;
@@ -151,7 +131,7 @@ int main(int nargs, char **argv)
 
         gettimeofday(&fin,NULL);
 
-	printf("Tiempo: %f\n", ((fin.tv_sec*1000000+fin.tv_usec)-(ini.tv_sec*1000000+ini.tv_usec))*1.0/1000000.0);
+	    printf("Tiempo: %f\n", ((fin.tv_sec*1000000+fin.tv_usec)-(ini.tv_sec*1000000+ini.tv_usec))*1.0/1000000.0);
         free(grey_image_filename);
     }
 }

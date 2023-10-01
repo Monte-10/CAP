@@ -76,9 +76,17 @@ int main(int nargs, char **argv)
         // RGB to grey scale
         int r, g, b;
         asm("#inicio_bucle");
-        for (int i = 0; i < width; i++)
+        /* for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
+            {
+                getRGB(rgb_image, width, height, 4, i, j, &r, &g, &b);
+                grey_image[j * width + i] = (int)(0.2989 * r + 0.5870 * g + 0.1140 * b);
+            }
+        } */
+        for (int j = 0; j < height; j++)
+        {
+            for (int i = 0; i < width; i++)
             {
                 getRGB(rgb_image, width, height, 4, i, j, &r, &g, &b);
                 grey_image[j * width + i] = (int)(0.2989 * r + 0.5870 * g + 0.1140 * b);

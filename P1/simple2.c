@@ -12,8 +12,9 @@ static double a[ARRAY_SIZE], b[ARRAY_SIZE], c;
 
 int main(int argc, char *argv[]) {
     int i,t;
-
+    double c = 0.0;
     double m = 1.0001;
+    int n_trials = atoi(argv[1]);
 
     /* Populate A and B arrays */
     for (i=0; i < ARRAY_SIZE; i++) {
@@ -22,7 +23,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* Perform an operation a number of times */
-    for (t=0; t < NUMBER_OF_TRIALS; t++) {
+    for (t=0; t < n_trials; t++) {
         for (i=0; i < ARRAY_SIZE; i++) {
             c += m*a[i] + b[i];
         }
