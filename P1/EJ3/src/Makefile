@@ -5,10 +5,13 @@ FLAGS = -O3 -march=native -fwhole-program -Wall -D_GNU_SOURCE
 
 .PHONY: clean all
 
-all: greyScale greyScale_intrinsics clear
+all: greyScale greyScale_intrinsics greyScale_autovectorized clear
 
 greyScale: greyScale.c stb_image_write.h stb_image.h
 	$(CC) $(FLAGS) -std=gnu99 $(LIB_DIR) -o $@ greyScale.c $(LIBS)
+
+greyScale_autovectorized: greyScale_autovectorized.c stb_image_write.h stb_image.h
+	$(CC) $(FLAGS) -std=gnu99 $(LIB_DIR) -o $@ greyScale_autovectorized.c $(LIBS)
 
 greyScale_intrinsics: greyScale_intrinsics.c stb_image_write.h stb_image.h
 	$(CC) $(FLAGS) -std=gnu99 $(LIB_DIR) -o $@ greyScale_intrinsics.c $(LIBS)
@@ -24,7 +27,7 @@ stb_image_write.h:
 	wget --no-check-certificate https://raw.githubusercontent.com/nothings/stb/master/stb_image_write.h
 
 clean:
-	rm -f *.o *~ greyScale greyScale_intrinsics
+	rm -f *.o *~ greyScale greyScale_intrinsics greyScale_autovectorized
 	
 clear:
 	rm -f *.o *~
