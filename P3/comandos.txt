@@ -1,0 +1,18 @@
+minikube start
+docker build -t base . -f base.Dockerfile
+docker build -t master . -f master.Dockerfile
+docker build -t worker . -f worker.Dockerfile
+minikube image load base
+minikube image load master
+minikube image load worker
+
+kubectl create namespace spark
+kubectl apply -f master.yaml
+kubectl apply -f worker.yaml
+
+kubectl exec spark-master-6b99b549b6-9pxxs -n spark -it -- pyspark --conf spark.driver.bindAddress=10.244.0.124 --conf spark.driver.host=10.244.0.124 --master=spark://10.244.0.124:7077
+
+kubectl scale deployment spark-worker --replicas=4 –n spark
+
+kubectl delete namespace spark
+kubectl delete pods -n spark --all
